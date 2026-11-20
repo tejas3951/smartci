@@ -10,8 +10,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+      - name: Pick base commit
+        id: base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          fi
       - run: pip install -r requirements.txt
+      - name: Select tests
+        id: select
+        run: |
+          base="${{ steps.base.outputs.sha }}"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            tests=$(ls tests/test_*.py | tr '\n' ' ')
+          else
+            tests=$(python scripts/affected_tests.py "$base" HEAD)
+          fi
+          echo "Selected: $tests"
+          echo "tests=$tests" >> "$GITHUB_OUTPUT"
       - name: Run tests
+        if: steps.select.outputs.tests != ''
         run: |
           set -o pipefail
-          pytest 2>&1 | tee build.log
+          pytest ${{ steps.select.outputs.tests }} 2>&1 | tee build.log
