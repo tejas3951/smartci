@@ -1,0 +1,9 @@
+{
+  "base": "2cdffd9",
+  "head": "6571cc7",
+  "score": 30,
+  "level": "high",
+  "reasons": [
+    ".github/workflows/ci.yml changed (+30)"
+  ]
+}

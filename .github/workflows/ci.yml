@@ -20,6 +20,15 @@ jobs:
             echo "sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
           fi
       - run: pip install -r requirements.txt
+      - name: Predict build-failure risk
+        if: steps.base.outputs.sha != ''
+        run: python scripts/predict_risk.py "${{ steps.base.outputs.sha }}" HEAD || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: risk-report
+          path: risk-report.json
+          if-no-files-found: ignore
       - name: Select tests
         id: select
         run: |
@@ -47,8 +56,7 @@ jobs:
           pytest ${{ steps.select.outputs.tests }} 2>&1 | tee build.log
       - name: Summarize failure
         if: failure()
-        run: |
-          python scripts/summarize_log.py build.log
+        run: python scripts/summarize_log.py build.log
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
