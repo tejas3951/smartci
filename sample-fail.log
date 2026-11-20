@@ -1,0 +1,2 @@
+FAILED tests/test_pricing.py::test_discount_boundaries - AssertionError
+E       assert 100.0 == 101.0
