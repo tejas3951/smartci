@@ -31,6 +31,15 @@ jobs:
           fi
           echo "Selected: $tests"
           echo "tests=$tests" >> "$GITHUB_OUTPUT"
+      - name: Write routing report
+        if: steps.base.outputs.sha != ''
+        run: python scripts/route_report.py "${{ steps.base.outputs.sha }}" HEAD || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-report
+          path: routing-report.json
+          if-no-files-found: ignore
       - name: Run tests
         if: steps.select.outputs.tests != ''
         run: |
