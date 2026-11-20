@@ -10,4 +10,6 @@ class Inventory:
             raise ValueError('not enough stock')
         self.stock[name] -= qty
 
-                                                            
+
+
+
